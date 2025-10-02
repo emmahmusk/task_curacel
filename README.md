@@ -52,25 +52,25 @@ venv\Scripts\activate       # Windows
 pip install -r requirements.txt
 
 
-## 🔑 **Environment Setup**
+## 🔑 Environment Setup
 
 Create a `.env` file in the project root:
 
 ```env
 OPENAI_API_KEY=your_openai_api_key_here
 
-## ▶️ **Running the Service**
+## ▶️ Running the Service
 
 Start the FastAPI server with Uvicorn:
 
 ```bash
 uvicorn api:app --reload
 
-## **LIVE DEMO (RENDER)**
+## LIVE DEMO (RENDER)
 
 https://task-curacel.onrender.com/docs
 
-## 📖 **API Documentation**
+## 📖 API Documentation
 
 Swagger UI → http://127.0.0.1:8000/docs
 
@@ -78,7 +78,7 @@ ReDoc UI → http://127.0.0.1:8000/redoc
 
 DOCUMENTATION LINK (PUBLIC) → https://task-curacel.onrender.com/docs
 
-## 📌 **Example Usage**
+## 📌 Example Usage
 1. Extract structured claim data
 
 ```bash
@@ -137,7 +137,7 @@ task_curacel/
 │── requirements.txt    # Dependencies
 │── README.md           # Project documentation
 
-## 📐 **Assumptions & Design Decisions**
+## 📐 Assumptions & Design Decisions
 
 OCR/LLM choice: Used GPT-4o for text + vision. Could be swapped for Google Gemini or Tesseract + LLM hybrid.
 
@@ -147,7 +147,7 @@ Storage: In-memory dict for simplicity; replace with DB in production.
 
 Error handling: Includes JSON cleanup fallback (strips ```json fences).
 
-## ✅ **Evaluation Criteria (addressed)**
+## ✅ Evaluation Criteria (addressed)
 
 Cleanliness & readability → Clear structure, modular endpoints.
 
@@ -159,7 +159,7 @@ Engineering considerations → Extensible, environment-based config.
 
 Documentation → This README provides full setup + usage guide.
 
-## 🚀 **Next Steps (Future Enhancements)**
+## 🚀 Next Steps (Future Enhancements)
 
 Replace in-memory storage with Postgres/Redis.
 
