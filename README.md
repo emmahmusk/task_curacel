@@ -26,7 +26,7 @@ source venv/bin/activate      # macOS / Linux
 
 pip install fastapi uvicorn python-multipart pillow
 
-TESTING ENHPOINTS
+## API DOCUMENTATION
 
 Open Swagger UI at: http://127.0.0.1:8000/docs
 
