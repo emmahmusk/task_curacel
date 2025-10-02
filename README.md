@@ -9,8 +9,8 @@ This repository contains a FastAPI microservice that accepts insurance claim ima
 ## Features
 - `POST /extract`: upload image or PDF -> returns `document_id` and structured extraction.
 - `POST /ask`: supply `document_id` and a question -> returns an answer about the document.
-- OCR with `pytesseract` and `pdf2image` (supports multi-page PDFs).
-- In-memory document store (suitable for a take-home task); easy to replace with persistent DB.
+- OCR with OPENAI (supports multi-page PDFs).
+- In-memory document store, easy to replace with persistent DB.
 - Heuristic extraction logic for patient name, age, diagnoses, medications, procedures, admission, dates, and total amount.
 - `/ask` logic includes a small QA layer that builds answers from the extracted structure.
 
@@ -24,7 +24,7 @@ python -m venv venv
 source venv/bin/activate      # macOS / Linux
 # venv\Scripts\activate       # Windows
 
-pip install fastapi uvicorn python-multipart pillow
+pip install fastapi uvicorn python-multipart pillow openai python-dotenv
 
 ## API DOCUMENTATION
 
