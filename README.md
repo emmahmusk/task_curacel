@@ -62,6 +62,9 @@ OPENAI_API_KEY=your_openai_api_key_here
 
 Start the FastAPI server with Uvicorn:
 
+```bash
+uvicorn api:app --reload
+
 ## 📖 API Documentation
 
 Swagger UI → http://127.0.0.1:8000/docs
@@ -97,7 +100,8 @@ Response:
       "admission_date": "2023-06-10",
       "discharge_date": "2023-06-12"
     },
-    "total_amount": "₦15,000"
+    "total_amount": "15,000",
+    "currency": "NGN"
   }
 }
 
@@ -109,7 +113,7 @@ curl -X POST "http://127.0.0.1:8000/ask" \
   -d '{"document_id": "abc123xyz", "question": "How many tablets of paracetamol were prescribed?"}'
 
 
-Response (question overridden internally):
+Response:
 
 ```json
 {
