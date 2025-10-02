@@ -134,4 +134,4 @@ async def ask(req: AskRequest):
 # HAVING AN OPENAI KEY
 @app.get("/alive")
 async def keep_alive():
-    return JSONResponse(status_code=200, detail="Service is alive")
+    return JSONResponse(content={"detail": "Service is alive"}, status_code=200)
