@@ -1,34 +1,22 @@
 import os
-import time
 import uuid
 import json
-from typing import Dict, Any
-
+from PIL import Image
+import base64
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
+from models import AskRequest
 from openai import OpenAI
 from dotenv import load_dotenv
 import io
 from prompt import EXTRACTION_PROMPT, ASK_PROMPT
+from storage import DOCUMENT_STORE
 # Load .env variables
 load_dotenv()
-
 # Initialize OpenAI client
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 app = FastAPI(title="Intelligent Claims QA Service")
-
-# In-memory storage
-DOCUMENT_STORE: Dict[str, Dict[str, Any]] = {}
-
-# -----------------------------
-# Models
-# -----------------------------
-class AskRequest(BaseModel):
-    document_id: str
-    question: str
-
 # -----------------------------
 # Endpoints
 # -----------------------------
@@ -111,12 +99,7 @@ async def extract(file: UploadFile = File(...)):
 
 @app.post("/ask")
 async def ask(req: AskRequest):
-    time.sleep(2)  # required delay
-
-    # Always override incoming question
-    question = "What medication is used and why?"
-
-    # If you're using Supabase, replace this with DB lookup
+    # Using In-Memory store as per instruction in the task description
     doc = DOCUMENT_STORE.get(req.document_id)
     if not doc:
         raise HTTPException(status_code=404, detail="document_id not found")
@@ -128,7 +111,7 @@ async def ask(req: AskRequest):
             model="gpt-4o",
             messages=[
                 {"role": "system", "content": ASK_PROMPT},
-                {"role": "user", "content": f"Structured claim data: {structured}\n\nQuestion: {question}"}
+                {"role": "user", "content": f"Structured claim data: {structured}\n\nQuestion: {req.question}"}
             ],
             max_tokens=400
         )
