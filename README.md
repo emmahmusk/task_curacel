@@ -1,54 +1,43 @@
-🏥 Curacel AI Take-Home Task: Intelligent Claims QA Service
+# 🏥 Curacel AI Take-Home Task: Intelligent Claims QA Service
 
-This repository contains a FastAPI microservice that processes scanned/photographed insurance claim documents, extracts structured information, and answers questions about the extracted claims data.
+This repository contains a **FastAPI microservice** that processes scanned or photographed insurance claim documents, extracts structured information, and answers questions about the extracted claims data.
 
-The service combines OCR + LLM reasoning to handle both images and PDFs, returning consistent JSON outputs.
+The service combines **OCR + LLM reasoning** to handle both images and PDFs, returning consistent structured JSON outputs.
 
-✨ Features
+---
 
-POST /extract
+## ✨ Features
 
-Input: Image (.jpg, .jpeg, .png) or PDF file containing a medical claim.
+### `POST /extract`
+- **Input**: Image (`.jpg`, `.jpeg`, `.png`) or PDF file containing a medical claim.  
+- **Output**: Structured JSON object with key claim details:
+  - `patient` (name, age)  
+  - `diagnoses`  
+  - `medications` (name, dosage, quantity)  
+  - `procedures`  
+  - `admission` (dates, admitted flag)  
+  - `total_amount`  
+- Supports **single or multi-page PDFs**.  
+- Uses **OpenAI GPT-4o (vision-capable)** for extraction.
 
-Output: Structured JSON object with key claim details (patient, diagnoses, medications, procedures, admission, total_amount).
+### `POST /ask`
+- **Input**: `document_id` and a `question`.  
+- **Output**: Answer derived from the previously extracted structured data.
+---
 
-Supports single or multi-page PDFs.
+## 📦 Storage
+- Uses an **in-memory dictionary** (`document_id → structured JSON`).  
+- Easy to extend/replace with a persistent database (e.g. Postgres, Redis, Supabase).
 
-Uses OpenAI GPT-4o (vision-capable) for extraction.
+---
 
-POST /ask
+## 🛠️ Requirements
+- **Python 3.9+** (tested on 3.9, 3.10, 3.11)
+- **OpenAI API key**
 
-Input: document_id and a question.
+### Installation
 
-Output: JSON with the answer.
-
-Includes required 2-second pause before processing requests.
-
-Internally overrides all questions with:
-
-“What medication is used and why?”
-
-Answers are generated based on previously extracted structured data.
-
-Storage
-
-Uses in-memory dictionary storage for extracted documents (document_id → structured JSON).
-
-Easy to extend/replace with a persistent database if needed.
-
-Developer Friendly
-
-Automatic interactive API docs via Swagger and ReDoc.
-
-Clear modular code for endpoints and prompt handling.
-
-🛠️ Requirements
-
-Python 3.9+ (tested on 3.9, 3.10, 3.11)
-
-OpenAI API key
-
-Install dependencies
+```bash
 # Clone repo
 git clone https://github.com/<your-username>/task_curacel.git
 cd task_curacel
@@ -58,40 +47,33 @@ python -m venv venv
 source venv/bin/activate      # macOS / Linux
 # venv\Scripts\activate       # Windows
 
-# Install requirements
+# Install dependencies
 pip install -r requirements.txt
 
 
-If you don’t have a requirements.txt, install directly:
+## 🔑 Environment Setup
 
-pip install fastapi uvicorn python-multipart pillow openai python-dotenv
+Create a `.env` file in the project root:
 
-🔑 Environment Setup
-
-Create a .env file in the project root:
-
+```env
 OPENAI_API_KEY=your_openai_api_key_here
 
-▶️ Running the Service
+## ▶️ Running the Service
 
 Start the FastAPI server with Uvicorn:
 
-uvicorn main:app --reload
+## 📖 API Documentation
+
+Swagger UI → http://127.0.0.1:8000/docs
+
+ReDoc UI → http://127.0.0.1:8000/redoc
 
 
-Replace main with the filename where your FastAPI app = FastAPI(...) is defined.
 
-Server will run at:
-👉 http://127.0.0.1:8000
-
-📖 API Documentation
-
-Swagger UI: http://127.0.0.1:8000/docs
-
-ReDoc UI: http://127.0.0.1:8000/redoc
-
-📌 Example Usage
+## 📌 Example Usage
 1. Extract structured claim data
+
+```bash
 curl -X POST "http://127.0.0.1:8000/extract" \
   -H "accept: application/json" \
   -H "Content-Type: multipart/form-data" \
@@ -100,6 +82,7 @@ curl -X POST "http://127.0.0.1:8000/extract" \
 
 Response:
 
+```json
 {
   "document_id": "abc123xyz",
   "extracted": {
@@ -119,6 +102,8 @@ Response:
 }
 
 2. Ask a question about the claim
+
+```bash
 curl -X POST "http://127.0.0.1:8000/ask" \
   -H "Content-Type: application/json" \
   -d '{"document_id": "abc123xyz", "question": "How many tablets of paracetamol were prescribed?"}'
@@ -126,46 +111,53 @@ curl -X POST "http://127.0.0.1:8000/ask" \
 
 Response (question overridden internally):
 
+```json
 {
   "answer": "Paracetamol was prescribed because of fever management..."
 }
 
-📂 Project Structure
+## 📂 Project Structure
+
 task_curacel/
-│── main.py              # FastAPI entry point
-│── prompt.py            # Prompt templates for extraction & QA
-│── .env                 # API keys (ignored by git)
-│── requirements.txt     # Dependencies
-│── README.md            # Project documentation
+│── api.py              # FastAPI entry point
+│── prompt.py           # Prompt templates for extraction & QA
+│── storage.py          # In-memory document storage
+│── models.py           # Pydantic request models
+│── tests/              # Unit tests (100% coverage)
+│── .env                # API keys (ignored by git)
+│── requirements.txt    # Dependencies
+│── README.md           # Project documentation
 
-📐 Assumptions & Design Decisions
+## 📐 Assumptions & Design Decisions
 
-OCR/LLM choice: Used OpenAI GPT-4o for both text & vision. Could be swapped for Google Gemini or Tesseract + LLM hybrid.
+OCR/LLM choice: Used GPT-4o for text + vision. Could be swapped for Google Gemini or Tesseract + LLM hybrid.
 
-Schema enforcement: Extraction attempts to follow the given JSON schema (patient, diagnoses, medications, etc.).
+Schema enforcement: Extraction follows a fixed schema (patient, diagnoses, medications, etc.).
 
-Storage: In-memory dictionary for simplicity. Suitable for a demo; in production, would use Supabase/Postgres/Redis.
+Storage: In-memory dict for simplicity; replace with DB in production.
 
-Error handling: Added JSON validation fallback (removes Markdown fences, retries parsing).
+Error handling: Includes JSON cleanup fallback (strips ```json fences).
 
-✅ Evaluation Criteria (addressed)
+## ✅ Evaluation Criteria (addressed)
 
-Cleanliness & readability → Clear structure, comments, docstrings.
+Cleanliness & readability → Clear structure, modular endpoints.
 
-Creativity in extraction → GPT-4o (vision + text) for flexible claim parsing.
+Creativity in extraction → GPT-4o for robust parsing.
 
-Reasoning with data → Structured schema enforced and used for QA.
+Reasoning with data → Schema-based QA logic.
 
-Engineering considerations → Modular prompts, environment configuration, easy extensibility.
+Engineering considerations → Extensible, environment-based config.
 
-Documentation → This README fully describes setup, running, assumptions, and usage.
+Documentation → This README provides full setup + usage guide.
 
-🚀 Next Steps (if extended to production)
+## 🚀 Next Steps (Future Enhancements)
 
 Replace in-memory storage with Postgres/Redis.
 
-Add authentication & API keys for endpoints.
+Add authentication & API key protection.
 
-Improve schema validation with Pydantic models.
+Stronger schema validation with Pydantic models.
 
-Add automated unit tests.
+More robust error handling (malformed files, large PDFs).
+
+Production deployment (Docker, Render, AWS, etc.).

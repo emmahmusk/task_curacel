@@ -11,15 +11,33 @@ from dotenv import load_dotenv
 import io
 from prompt import EXTRACTION_PROMPT, ASK_PROMPT
 from storage import DOCUMENT_STORE
+
 # Load .env variables
 load_dotenv()
+
 # Initialize OpenAI client
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 app = FastAPI(title="Intelligent Claims QA Service")
-# -----------------------------
-# Endpoints
-# -----------------------------
+
+
+def _parse_json_text(structured_text: str):
+    """Try direct parse, otherwise fallback to cleanup."""
+    try:
+        return json.loads(structured_text)
+    except Exception:
+        return _parse_json_text_with_cleanup(structured_text)
+
+
+def _parse_json_text_with_cleanup(structured_text: str):
+    """Cleanup and retry parse, otherwise raise."""
+    cleaned = structured_text.strip("```json").strip("```").strip()
+    try:
+        return json.loads(cleaned)
+    except Exception:
+        raise HTTPException(status_code=500, detail="Model did not return valid JSON")
+
+
 @app.post("/extract")
 async def extract(file: UploadFile = File(...)):
     contents = await file.read()
@@ -30,7 +48,6 @@ async def extract(file: UploadFile = File(...)):
 
     try:
         if filename.endswith((".png", ".jpg", ".jpeg")):
-            # Handle image: convert to base64
             img = Image.open(io.BytesIO(contents)).convert("RGB")
             buffered = io.BytesIO()
             img.save(buffered, format="JPEG")
@@ -44,10 +61,7 @@ async def extract(file: UploadFile = File(...)):
                     {
                         "role": "user",
                         "content": [
-                            {
-                                "type": "text",
-                                "text": "Extract structured claim details strictly following the schema."
-                            },
+                            {"type": "text", "text": "Extract structured claim details strictly following the schema."},
                             {"type": "image_url", "image_url": {"url": data_uri}}
                         ],
                     },
@@ -78,18 +92,12 @@ async def extract(file: UploadFile = File(...)):
         else:
             raise HTTPException(status_code=400, detail="Unsupported file type. Upload JPG, PNG, or PDF.")
 
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"OpenAI extraction error: {e}")
 
-    # Try parsing JSON
-    try:
-        structured = json.loads(structured_text)
-    except Exception:
-        try:
-            cleaned = structured_text.strip("```json").strip("```").strip()
-            structured = json.loads(cleaned)
-        except Exception:
-            raise HTTPException(status_code=500, detail="Model did not return valid JSON")
+    structured = _parse_json_text(structured_text)
 
     doc_id = uuid.uuid4().hex
     DOCUMENT_STORE[doc_id] = {"structured": structured, "raw_text": structured_text}
@@ -99,7 +107,6 @@ async def extract(file: UploadFile = File(...)):
 
 @app.post("/ask")
 async def ask(req: AskRequest):
-    # Using In-Memory store as per instruction in the task description
     doc = DOCUMENT_STORE.get(req.document_id)
     if not doc:
         raise HTTPException(status_code=404, detail="document_id not found")
@@ -121,3 +128,9 @@ async def ask(req: AskRequest):
 
     return JSONResponse({"answer": answer})
 
+
+# JUST WROTE THIS TO KEEP RENDER SERVICE ALIVE TO HOST THIS REPO AND ENABLE EXAMINER TEST WITHOUT
+# HAVING A OPENAI KEY
+@app.get("/alive")
+async def keep_alive():
+    return JSONResponse(status_code=200, detail="Service is alive")
