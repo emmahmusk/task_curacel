@@ -24,5 +24,11 @@ python -m venv venv
 source venv/bin/activate      # macOS / Linux
 # venv\Scripts\activate       # Windows
 
-pip install fastapi uvicorn python-multipart pillow pytesseract pdf2image pydantic
+pip install fastapi uvicorn python-multipart pillow
+
+TESTING ENHPOINTS
+
+Open Swagger UI at: http://127.0.0.1:8000/docs
+
+Or ReDoc UI at: http://127.0.0.1:8000/redoc
 
