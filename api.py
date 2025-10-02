@@ -20,23 +20,24 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 app = FastAPI(title="Intelligent Claims QA Service")
 
-
+# Helper functions
 def _parse_json_text(structured_text: str):
-    """Try direct parse, otherwise fallback to cleanup."""
     try:
-        return json.loads(structured_text)
+        parsed = json.loads(structured_text)
     except Exception:
-        return _parse_json_text_with_cleanup(structured_text)
+        cleaned = structured_text.strip("```json").strip("```").strip()
+        try:
+            parsed = json.loads(cleaned)
+        except Exception:
+            # If we can’t parse, treat it as bad input (not a valid claim JSON)
+            raise HTTPException(status_code=400, detail="Uploaded file does not appear to be a valid insurance claim")
 
+    # Validate schema — must look like an insurance claim
+    required_fields = {"patient", "diagnoses", "medications", "procedures", "total_amount"}
+    if not isinstance(parsed, dict) or not any(field in parsed for field in required_fields):
+        raise HTTPException(status_code=400, detail="Uploaded file does not appear to be a valid insurance claim")
 
-def _parse_json_text_with_cleanup(structured_text: str):
-    """Cleanup and retry parse, otherwise raise."""
-    cleaned = structured_text.strip("```json").strip("```").strip()
-    try:
-        return json.loads(cleaned)
-    except Exception:
-        raise HTTPException(status_code=500, detail="Model did not return valid JSON")
-
+    return parsed
 
 @app.post("/extract")
 async def extract(file: UploadFile = File(...)):
@@ -71,8 +72,10 @@ async def extract(file: UploadFile = File(...)):
             structured_text = completion.choices[0].message.content.strip()
 
         elif filename.endswith(".pdf"):
-            uploaded_file = client.files.create(file=(file.filename, io.BytesIO(contents)), purpose="assistants")
-
+            uploaded_file = client.files.create(
+                file=(file.filename, io.BytesIO(contents)),
+                purpose="assistants"
+            )
             response = client.responses.create(
                 model="gpt-4o",
                 input=[
@@ -103,8 +106,6 @@ async def extract(file: UploadFile = File(...)):
     DOCUMENT_STORE[doc_id] = {"structured": structured, "raw_text": structured_text}
 
     return JSONResponse({"document_id": doc_id, "extracted": structured})
-
-
 @app.post("/ask")
 async def ask(req: AskRequest):
     doc = DOCUMENT_STORE.get(req.document_id)
@@ -130,7 +131,7 @@ async def ask(req: AskRequest):
 
 
 # JUST WROTE THIS TO KEEP RENDER SERVICE ALIVE TO HOST THIS REPO AND ENABLE EXAMINER TEST WITHOUT
-# HAVING A OPENAI KEY
+# HAVING AN OPENAI KEY
 @app.get("/alive")
 async def keep_alive():
     return JSONResponse(status_code=200, detail="Service is alive")
