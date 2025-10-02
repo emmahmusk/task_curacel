@@ -32,48 +32,53 @@ The service combines **OCR + LLM reasoning** to handle both images and PDFs, ret
 ---
 
 ## 🛠️ Requirements
-- **Python 3.9+** (tested on 3.9, 3.10, 3.11)
+- **Python 3.9+** (tested on 3.9, 3.10, 3.11, 3.12, 3.13)
+- **FastAPI**
 - **OpenAI API key**
 
 ### Installation
 
 ```bash
 # Clone repo
-git clone https://github.com/<your-username>/task_curacel.git
+git clone https://github.com/emmahmusk/task_curacel.git
 cd task_curacel
 
 # Setup virtual environment
 python -m venv venv
 source venv/bin/activate      # macOS / Linux
-# venv\Scripts\activate       # Windows
+venv\Scripts\activate       # Windows
 
 # Install dependencies
 pip install -r requirements.txt
 
 
-## 🔑 Environment Setup
+## 🔑 **Environment Setup**
 
 Create a `.env` file in the project root:
 
 ```env
 OPENAI_API_KEY=your_openai_api_key_here
 
-## ▶️ Running the Service
+## ▶️ **Running the Service**
 
 Start the FastAPI server with Uvicorn:
 
 ```bash
 uvicorn api:app --reload
 
-## 📖 API Documentation
+## **LIVE DEMO (RENDER)**
+
+https://task-curacel.onrender.com/docs
+
+## 📖 **API Documentation**
 
 Swagger UI → http://127.0.0.1:8000/docs
 
 ReDoc UI → http://127.0.0.1:8000/redoc
 
+DOCUMENTATION LINK (PUBLIC) → https://task-curacel.onrender.com/docs
 
-
-## 📌 Example Usage
+## 📌 **Example Usage**
 1. Extract structured claim data
 
 ```bash
@@ -132,7 +137,7 @@ task_curacel/
 │── requirements.txt    # Dependencies
 │── README.md           # Project documentation
 
-## 📐 Assumptions & Design Decisions
+## 📐 **Assumptions & Design Decisions**
 
 OCR/LLM choice: Used GPT-4o for text + vision. Could be swapped for Google Gemini or Tesseract + LLM hybrid.
 
@@ -142,7 +147,7 @@ Storage: In-memory dict for simplicity; replace with DB in production.
 
 Error handling: Includes JSON cleanup fallback (strips ```json fences).
 
-## ✅ Evaluation Criteria (addressed)
+## ✅ **Evaluation Criteria (addressed)**
 
 Cleanliness & readability → Clear structure, modular endpoints.
 
@@ -154,7 +159,7 @@ Engineering considerations → Extensible, environment-based config.
 
 Documentation → This README provides full setup + usage guide.
 
-## 🚀 Next Steps (Future Enhancements)
+## 🚀 **Next Steps (Future Enhancements)**
 
 Replace in-memory storage with Postgres/Redis.
 
