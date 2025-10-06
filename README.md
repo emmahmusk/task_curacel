@@ -7,7 +7,7 @@ The service combines **OCR + LLM reasoning** to handle both images and PDFs, ret
 ---
 
 ## ✨ Features
-Note that this assumes for medical claims only, However this can be extended for other types of claims such as auto, property, travel etc.
+Note that this assumes for medical claims only, However this can be extended for other types of claims such as auto, property, travel etc. by changing the prompts and schema
 
 ### `POST /extract`
 - **Input**: Image (`.jpg`, `.jpeg`, `.png`) or PDF file containing a medical claim.  
