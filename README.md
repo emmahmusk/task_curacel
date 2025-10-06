@@ -7,6 +7,7 @@ The service combines **OCR + LLM reasoning** to handle both images and PDFs, ret
 ---
 
 ## ✨ Features
+Note that this assumes for medical claims only, However this can be extended for other types of claims such as auto, property, travel etc.
 
 ### `POST /extract`
 - **Input**: Image (`.jpg`, `.jpeg`, `.png`) or PDF file containing a medical claim.  
@@ -141,7 +142,7 @@ task_curacel/
 
 OCR/LLM choice: Used GPT-4o for text + vision. Could be swapped for Google Gemini or Tesseract + LLM hybrid.
 
-Schema enforcement: Extraction follows a fixed schema (patient, diagnoses, medications, etc.).
+Schema enforcement: Extraction follows a fixed schema (patient, diagnoses, medications, etc.). Could be extended to other types of claim by changing the prompt and schema
 
 Storage: In-memory dict for simplicity; replace with DB in production.
 
